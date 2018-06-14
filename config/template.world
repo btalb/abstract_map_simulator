@@ -1,0 +1,148 @@
+################################################################################
+### WARNING: Only edit the template version of this file in the 'config'  ######
+### directory. Other versions are dynamically deleted and replaced with   ######
+### a populated copy of the template whenever programs are run.           ######
+################################################################################
+
+################################################################################
+### This section below is constant for all worlds ##############################
+################################################################################
+define guiabot_laser ranger
+(
+ update_interval 200
+ sensor(
+   range [0.0 15]
+   fov 360
+   samples 360
+   )
+
+ block (
+   points 4
+   point[0] [1 0]
+   point[1] [0 1]
+   point[2] [-1 0]
+   point[3] [0 -1]
+   z [0 1]
+   )
+
+ color_rgba [0 0 1 0.3]
+ size [ 0.2 0.2 0.1 ]
+ pose [0.0 0.0 0.0 0]
+
+)
+
+define guiabot position
+(
+# Shape of the robot
+ block
+ (
+  points 8
+  point[0] [1 0]
+  point[1] [0.707 0.707]
+  point[2] [0 1]
+  point[3] [-0.707 0.707]
+  point[4] [-1 0]
+  point[5] [-0.707 -0.707]
+  point[6] [0 -1]
+  point[7] [0.707 -0.707]
+
+  z [0 1]
+ )
+
+# Fit shape to size
+ size [ 0.2 0.2 1.5 ]
+
+# Force perfect odometry
+localization "gps"
+
+# Diff drive
+drive "omni"
+)
+
+define floorplan model
+(
+ color "gray30"
+
+ boundary 1
+ gui_nose 0
+ gui_grid 0
+ gui_outline 0
+ gripper_return 0
+ fiducial_return 0
+ ranger_return 1
+ )
+
+resolution 0.01
+interval_sim 100
+
+window
+(
+ size [ 1200 775 ]
+
+ center [ 0 0 ]
+ scale 20
+
+ show_data 1
+ show_grid 0
+ )
+
+################################################################################
+### Custom model for representing April Tags ###################################
+################################################################################
+
+define apriltag position
+(
+ update_interval 50
+
+# Shape of the door
+ block
+ (
+  points 4
+  point[0] [0 1]
+  point[1] [1 1]
+  point[2] [1 0]
+  point[3] [0 0]
+
+  z [0 1]
+ )
+ size [@TAG_DEPTH@ @TAG_WIDTH@ @WORLD_HEIGHT@ ]
+ origin [0 @TAG_CENTER@ 0 0.0]
+
+# Color of the model
+ color "red"
+
+# Force perfect 'odometry'
+localization "gps"
+
+# Appearance properties for various sensors
+obstacle_return 1
+ranger_return 1.0
+)
+
+################################################################################
+### Create the world from the floor plan (ensuring the size is correct) ########
+################################################################################
+floorplan
+(
+ name "ROS Simulation World"
+ bitmap "@FLOOR_PLAN_FILENAME@"
+ size [ @FLOOR_PLAN_WH@ @WORLD_HEIGHT@ ]
+ pose [ @FLOOR_PLAN_XY@ 0 0 ]
+ )
+
+################################################################################
+### Create the simulated Guiabot here (pose should be edited as required) ######
+################################################################################
+guiabot
+(
+ name "guiabot"
+ color "green"
+
+ pose [ @ROBOT_POSE@ ]
+
+ guiabot_laser()
+ )
+
+################################################################################
+### All declared symbolic information sources go below this line ###############
+################################################################################

@@ -4,7 +4,12 @@ from PIL import Image
 import pdb
 import sys
 
-PPM_SUFFIX = '_ppm'
+from human_cues_tag_simulator import simulator as sim
+
+# THIS IS OLD DIRTY CODE (SHOULD STILL WORK, BUT NOT GUARANTEED TO BE
+# CONSISTENT WITH WHAT IS DONE IN THE LIBRARY FILES)
+
+PPM_SUFFIX = '_ppm.txt'
 
 THRESH_OCCUPIED = 0.6
 THRESH_FREE = 0.3
@@ -16,24 +21,9 @@ def main(map_filename):
     fn_dir = os.path.abspath(os.path.dirname(map_filename))
     fn_map, fn_ext = os.path.splitext(os.path.basename(map_filename))
 
-    # Extract the pixels per meter parameter
-    ppm_search = os.path.join(fn_dir, fn_map + PPM_SUFFIX + '*')
-    ppms = glob.glob(ppm_search)
-    if not ppms:
-        raise ValueError(
-            "No pixel per meter (ppm) file was found while searching in: %s" %
-            ppm_search)
-    elif len(ppms) > 1:
-        raise ValueError(
-            "%d pixel per meter matches were found (%s)" % (len(ppms), ppms))
-    print("Extracting the Pixels Per Meter conversion from: %s" % (ppms[0]))
-    with open(ppms[0], 'r') as ppms_file:
-        vs = [float(x) for x in ppms_file.read().split()]
-        if len(vs) != 2:
-            raise ValueError(
-                "Found %d values in Pixel Per Meter file (requires 2)" %
-                (len(vs)))
-    ppm = vs[0] / vs[1]
+    # Get the pixels per meter value from file
+    ppm = sim.loadPixelsPerMeter(
+        os.path.join(fn_dir, fn_map + PPM_SUFFIX), True)
     print("\tExtracted a Pixels Per Meter of: %f" % (ppm))
 
     # Get the dimensions of the image

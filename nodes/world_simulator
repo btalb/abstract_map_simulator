@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import rospkg
+import rospy
+import os
+import sys
+
+from human_cues_tag_simulator import simulator
+
+ENV_DEFAULT = 's11'
+
+
+def main(env=ENV_DEFAULT):
+    """Main function for running the node"""
+    # Generate a world file, containing the map, tags, and robot
+    simulator.generateWorldFile(env)
+    pass
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main()
