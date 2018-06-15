@@ -104,15 +104,16 @@ define guiabot position
   block
   (
    points 4
-   point[0] [0 1]
+   point[0] [-1 1]
    point[1] [1 1]
-   point[2] [1 0]
-   point[3] [0 0]
+   point[2] [1 -1]
+   point[3] [-1 -1]
 
-   z [0 1]
+   z [0 1]  # Parameter stupidly HAS ZERO support for negative numbers...
   )
-  size [@TAG_DEPTH@ @TAG_WIDTH@ @WORLD_HEIGHT@ ]
-  origin [0 @TAG_CENTER@ 0 0.0]
+
+  size [ @TAG_DEPTH@ @TAG_WIDTH@ @TAG_HEIGHT@ ]
+  origin [ @TAG_OFFSET@ 0 0 0 ]
 
 # Color of the model
   color "red"

@@ -8,11 +8,14 @@ import rospy
 
 from human_cues_tag_simulator import tags, tools
 
-WORLD_TAG_DEPTH = 0.1
-WORLD_TAG_WIDTH = 0.3
-WORLD_TAG_CENTER = WORLD_TAG_WIDTH / 2
+WORLD_TAG_DEPTH = 0.25
+WORLD_TAG_HEIGHT = 0.5
+WORLD_TAG_OFFSET = WORLD_TAG_DEPTH / 2
+WORLD_TAG_WIDTH = 0.5
+WORLD_TAG_Z = 1.35 - WORLD_TAG_HEIGHT / 2
 WORLD_VAR_REGEX = re.compile(r'@.*?@')
 WORLD_WORLD_HEIGHT = 3
+WORLD_TAG_STRING = "apriltag\n(\n name \"tag_@id\"\n pose [ @pose ]\n)"
 
 FILE_TEMPLATE = 'template.world'
 
@@ -50,10 +53,12 @@ def generateWorldFile(env_name):
     subs_dict = {
         '@TAG_DEPTH@':
         str(WORLD_TAG_DEPTH),
+        '@TAG_HEIGHT@':
+        str(WORLD_TAG_HEIGHT),
+        '@TAG_OFFSET@':
+        str(WORLD_TAG_OFFSET),
         '@TAG_WIDTH@':
         str(WORLD_TAG_WIDTH),
-        '@TAG_CENTER@':
-        str(WORLD_TAG_CENTER),
         '@WORLD_HEIGHT@':
         str(WORLD_WORLD_HEIGHT),
         '@FLOOR_PLAN_FILENAME@':
@@ -67,11 +72,19 @@ def generateWorldFile(env_name):
     }
     with open(fn_template, 'r') as template_file, open(fn_out,
                                                        'w') as world_file:
+        # Rewrite each of the existing lines, with the included variables
         for line in template_file:
             line_out = line
             for v in re.findall(WORLD_VAR_REGEX, line):
                 line_out = line_out.replace(v, subs_dict[v])
             world_file.write(line_out)
+
+        # Add in the lines for each tag object to the end of the file
+        for t in tag_list:
+            world_file.write(
+                WORLD_TAG_STRING.replace("@id", str(t['id'])).replace(
+                    "@pose", "%f %f %f %f" %
+                    (t['x'], t['y'], WORLD_TAG_Z, t['th_deg'])) + "\n\n")
 
     # Finish, telling the user what was done
     print("Wrote a new world file to: %s" % (fn_out))
