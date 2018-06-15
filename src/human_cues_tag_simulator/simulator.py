@@ -6,23 +6,20 @@ import re
 import rospkg
 import rospy
 
-from human_cues_tag_simulator import tags
+from human_cues_tag_simulator import tags, tools
 
-PACKAGE_NAME = 'human_cues_tag_simulator'
-
-WORLD_DIR = 'worlds'
 WORLD_TAG_DEPTH = 0.1
 WORLD_TAG_WIDTH = 0.3
 WORLD_TAG_CENTER = WORLD_TAG_WIDTH / 2
-WORLD_TEMPLATE = 'config/template.world'
 WORLD_VAR_REGEX = re.compile(r'@.*?@')
 WORLD_WORLD_HEIGHT = 3
 
-FLOOR_PLAN_SUFFIX = '.png'
-PPM_SUFFIX = '_ppm.txt'
-START_POSE_SUFFIX = '_start_pose.txt'
-TAGS_SUFFIX = '_tags.txt'
-WORLD_SUFFIX = '.world'
+FILE_TEMPLATE = 'template.world'
+
+SUFFIX_FLOOR_PLAN = '.png'
+SUFFIX_PPM = '_ppm.txt'
+SUFFIX_START_POSE = '_start_pose.txt'
+SUFFIX_TAGS = '_tags.txt'
 
 
 def defaultStartPose():
@@ -33,15 +30,13 @@ def defaultStartPose():
 def generateWorldFile(env_name):
     """Generate a world file from a provided environment name"""
     # Get some filenames
-    rospack = rospkg.RosPack()
-    path_pkg = rospack.get_path(PACKAGE_NAME)
-    fn_template = os.path.join(path_pkg, WORLD_TEMPLATE)
-    fn_env = os.path.join(path_pkg, WORLD_DIR, env_name)
-    fn_fp = fn_env + FLOOR_PLAN_SUFFIX
-    fn_ppm = fn_env + PPM_SUFFIX
-    fn_start_pose = fn_env + START_POSE_SUFFIX
-    fn_tags = fn_env + TAGS_SUFFIX
-    fn_out = fn_env + WORLD_SUFFIX
+    fn_template = os.path.join(tools.configPath(), FILE_TEMPLATE)
+    fn_env = tools.worldRoot(env_name)
+    fn_fp = fn_env + SUFFIX_FLOOR_PLAN
+    fn_ppm = fn_env + SUFFIX_PPM
+    fn_start_pose = fn_env + SUFFIX_START_POSE
+    fn_tags = fn_env + SUFFIX_TAGS
+    fn_out = tools.worldPath(env_name)
 
     # Load all required data from the files
     im = Image.open(fn_fp)
@@ -53,14 +48,22 @@ def generateWorldFile(env_name):
 
     # Loop through the template file, writing the output file at the same time
     subs_dict = {
-        '@TAG_DEPTH@': str(WORLD_TAG_DEPTH),
-        '@TAG_WIDTH@': str(WORLD_TAG_WIDTH),
-        '@TAG_CENTER@': str(WORLD_TAG_CENTER),
-        '@WORLD_HEIGHT@': str(WORLD_WORLD_HEIGHT),
-        '@FLOOR_PLAN_FILENAME@': os.path.basename(fn_fp),
-        '@FLOOR_PLAN_WH@': "%f %f" % (im_w / ppm, im_h / ppm),
-        '@FLOOR_PLAN_XY@': "%f %f" % (-0.5 * im_w / ppm, -0.5 * im_h / ppm),
-        '@ROBOT_POSE@': "%f %f %f" % tuple(start_pose.values())
+        '@TAG_DEPTH@':
+        str(WORLD_TAG_DEPTH),
+        '@TAG_WIDTH@':
+        str(WORLD_TAG_WIDTH),
+        '@TAG_CENTER@':
+        str(WORLD_TAG_CENTER),
+        '@WORLD_HEIGHT@':
+        str(WORLD_WORLD_HEIGHT),
+        '@FLOOR_PLAN_FILENAME@':
+        os.path.basename(fn_fp),
+        '@FLOOR_PLAN_WH@':
+        "%f %f" % (im_w / ppm, im_h / ppm),
+        '@FLOOR_PLAN_XY@':
+        "%f %f" % (0, 0),
+        '@ROBOT_POSE@':
+        "%f %f 0 %f" % (start_pose['x'], start_pose['y'], start_pose['th_deg'])
     }
     with open(fn_template, 'r') as template_file, open(fn_out,
                                                        'w') as world_file:
@@ -91,11 +94,7 @@ def loadStartPose(fn):
     with open(fn, 'r') as pose_file:
         pose_reader = csv.reader(pose_file, delimiter=' ')
         row = next(pose_reader)
-        pose = {
-            'x': float(row[0][0]),
-            'y': float(row[0][1]),
-            'th_deg': float(row[0][2])
-        }
+        pose = {'x': float(row[0]), 'y': float(row[1]), 'th_deg': float(row[2])}
 
     rospy.loginfo("Loaded the following starting pose from: %s" % (fn))
     rospy.loginfo("\t%s" % (startPose2String(pose)))
