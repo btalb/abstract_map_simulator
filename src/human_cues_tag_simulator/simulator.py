@@ -47,7 +47,7 @@ def generateWorldFile(env_name):
     ppm = loadPixelsPerMeter(fn_ppm)
     start_pose = (defaultStartPose() if not os.path.exists(fn_start_pose) else
                   loadStartPose(fn_start_pose))
-    tag_list = tags.loadTags(fn_tags)
+    tag_list = [] if not os.path.exists(fn_tags) else tags.loadTags(fn_tags)
 
     # Loop through the template file, writing the output file at the same time
     subs_dict = {

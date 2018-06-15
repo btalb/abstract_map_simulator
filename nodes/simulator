@@ -13,6 +13,13 @@ ENV_DEFAULT = 's11'
 
 def main(env=ENV_DEFAULT):
     """Main function for running the node"""
+    # Initialise a light node, and use it to get any parameter values passed in
+    # requesting remaps
+    rospy.init_node('simulator')
+    cmd_vel_topic = rospy.get_param('~cmd_vel_topic', '/cmd_vel')
+    odom_topic = rospy.get_param('~odom_topic', '/odom')
+    scan_topic = rospy.get_param('~scan_topic', '/scan')
+
     # Generate a world file, containing the map, tags, and robot
     simulator.generateWorldFile(env)
 
@@ -20,7 +27,13 @@ def main(env=ENV_DEFAULT):
     uuid = roslaunch.rlutil.get_or_generate_uuid(None, True)
     roslaunch.configure_logging(uuid)
     node = roslaunch.core.Node(
-        'stage_ros', 'stageros', 'stage', args='-u ' + tools.worldPath(env))
+        'stage_ros',
+        'stageros',
+        'stage',
+        args='-u -g ' + tools.worldPath(env),
+        remap_args=[('/guiabot/cmd_vel', cmd_vel_topic),
+                    ('/guiabot/odom', odom_topic), ('/guiabot/base_scan',
+                                                    scan_topic)])
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
     process = launch.launch(node)
