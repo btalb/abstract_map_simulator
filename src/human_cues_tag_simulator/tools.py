@@ -1,5 +1,6 @@
 import os
 import rospkg
+import tf
 
 PACKAGE_NAME = 'human_cues_tag_simulator'
 
@@ -17,6 +18,18 @@ def configPath():
 def packagePath():
     """Returns the root directory of the simulator package"""
     return rospkg.RosPack().get_path(PACKAGE_NAME)
+
+
+def quaternionMsgToTuple(msg):
+    """Helper function for converting a quaternion msg to a tuple"""
+    return (msg.x, msg.y, msg.z, msg.w)
+
+
+def quaternionMsgToYaw(msg):
+    """Helper function for getting the yaw angle from a quaternion msg"""
+    r, p, y = tf.transformations.euler_from_quaternion(
+        quaternionMsgToTuple(msg))
+    return y
 
 
 def worldPath(env_name):
