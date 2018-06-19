@@ -1,6 +1,6 @@
 import os
 import rospkg
-import tf
+import tf_conversions
 
 PACKAGE_NAME = 'human_cues_tag_simulator'
 
@@ -27,7 +27,7 @@ def quaternionMsgToTuple(msg):
 
 def quaternionMsgToYaw(msg):
     """Helper function for getting the yaw angle from a quaternion msg"""
-    r, p, y = tf.transformations.euler_from_quaternion(
+    r, p, y = tf_conversions.transformations.euler_from_quaternion(
         quaternionMsgToTuple(msg))
     return y
 
