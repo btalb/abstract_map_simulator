@@ -72,6 +72,15 @@ void cbNewPose(const nav_msgs::Odometry& msg) {
                                      ros::Time::now(), "/laser"),
         atd.pose);
     atda.detections.push_back(atd);
+    /* ROS_ERROR("Robot: (%f, %f, %f), Tag: (%f, %f, %f), Detection: (%f, %f,
+     * %f)", */
+    /*           pose_robot.getOrigin().x(), pose_robot.getOrigin().y(), */
+    /*           tf2::getYaw(pose_robot.getRotation()), */
+    /*           (tp.second)->getOrigin().x(), (tp.second)->getOrigin().y(), */
+    /*           tf2::getYaw((tp.second)->getRotation()),
+     * atd.pose.pose.position.x, */
+    /*           atd.pose.pose.position.y,
+     * tf2::getYaw(atd.pose.pose.orientation)); */
   }
   pub_tag_detections_.publish(atda);
 }
