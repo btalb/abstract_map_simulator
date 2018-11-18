@@ -1,7 +1,0 @@
-<launch>
-  <param name="use_sim_time" value="true" />
-  <include file="$(find guiabot_mapping)/launch/build_map.launch" />
-  <include file="$(find guiabot_navigate)/launch/move_base.launch" >
-    <arg name="allow_unknown" value="true" />
-  </include>
-</launch>
