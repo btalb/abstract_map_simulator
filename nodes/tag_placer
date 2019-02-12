@@ -30,7 +30,9 @@ tags = []
 def addTag(tag):
     """Adds a tag to the global list of tags (also updating visuals)"""
     global tags
+    tags = [t for t in tags if t[0] != tag[0]]  # Filter out duplicates
     tags.append(tag)
+    tags = sorted(tags, key=lambda x: x[0])  # Resort them
     updateTagMarkers()
 
 
@@ -41,8 +43,8 @@ def callbackClick(msg):
     # Process the event
     rospy.loginfo("Creation event received. Handling:")
     r, p, y = tf.transformations.euler_from_quaternion(
-        (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z,
-         msg.pose.orientation.w))
+        (msg.pose.orientation.x, msg.pose.orientation.y,
+         msg.pose.orientation.z, msg.pose.orientation.w))
     y_deg = y * 180 / math.pi
     print("\ttag creation requested @ (%f,%f), facing %f deg" %
           (msg.pose.position.x, msg.pose.position.y, y_deg))
@@ -210,7 +212,7 @@ if __name__ == '__main__':
     else:
         fn_in = None
     fn_out = os.path.abspath(OUTPUT_FILENAME)
-    rospy.loginfo("\tInput Tags File:\t%s" % ("None"
-                                              if fn_in is None else fn_in))
+    rospy.loginfo(
+        "\tInput Tags File:\t%s" % ("None" if fn_in is None else fn_in))
     rospy.loginfo("\tOutput Tags File:\t%s" % (fn_out))
     main(fn_in, fn_out)
