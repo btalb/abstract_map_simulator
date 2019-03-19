@@ -1,0 +1,389 @@
+################################################################################
+### WARNING: Only edit the template version of this file in the 'config'  ######
+### directory. Other versions are dynamically deleted and replaced with   ######
+### a populated copy of the template whenever programs are run.           ######
+################################################################################
+
+################################################################################
+### This section below is constant for all worlds ##############################
+################################################################################
+define guiabot_laser ranger
+(
+ update_interval 200
+ sensor(
+   range [0.0 8.1]
+   fov 180
+   samples 181
+   )
+
+ block (
+   points 4
+   point[0] [1 0]
+   point[1] [0 1]
+   point[2] [-1 0]
+   point[3] [0 -1]
+   z [0 1]
+   )
+
+ color_rgba [0 0 1 0.3]
+ size [ 0.2 0.2 0.1 ]
+ pose [0.0 0.0 0.0 0]
+
+)
+
+define guiabot position
+(
+# Shape of the robot
+ block
+ (
+  points 14
+  point[0] [-0.15 0.24]
+  point[1] [0.15 0.24]
+  point[2] [0.23 0.18]
+  point[3] [0.28 0.095]
+  point[4] [0.295 0]
+  point[5] [0.28 -0.095]
+  point[6] [0.23 -0.18]
+  point[7] [0.15 -0.24]
+  point[8] [-0.15 -0.24]
+  point[9] [-0.23 -0.18]
+  point[10] [-0.28 -0.095]
+  point[11] [-0.295 0]
+  point[12] [-0.28 0.095]
+  point[13] [-0.23 0.18]
+
+  z [0 1.35]
+ )
+
+# Fit shape to size
+ size [ 0.59 0.48 1.35 ]
+
+# Force perfect odometry
+ localization "gps"
+
+# Diff drive
+ drive "omni"
+ )
+
+ define floorplan model
+ (
+  color "gray30"
+
+  boundary 1
+  gui_nose 0
+  gui_grid 0
+  gui_outline 0
+  gripper_return 0
+  fiducial_return 0
+  ranger_return 1
+ )
+
+ resolution 0.01
+ interval_sim 100
+
+ window
+ (
+  size [ 1200 775 ]
+
+  center [ 0 0 ]
+  scale 20
+
+  show_data 1
+  show_grid 0
+ )
+
+################################################################################
+### Custom model for representing April Tags ###################################
+################################################################################
+
+ define apriltag position
+ (
+  update_interval 50
+
+# Shape of the door
+  block
+  (
+   points 4
+   point[0] [-1 1]
+   point[1] [1 1]
+   point[2] [1 -1]
+   point[3] [-1 -1]
+
+   z [0 1]  # Parameter stupidly HAS ZERO support for negative numbers...
+  )
+
+  size [ 0.25 0.5 0.5 ]
+  origin [ 0.125 0 0 0 ]
+
+# Color of the model
+  color "red"
+
+# Force perfect 'odometry'
+ localization "gps"
+
+# Appearance properties for various sensors
+ obstacle_return 1
+ ranger_return 1.0
+ )
+
+################################################################################
+### Create the world from the floor plan (ensuring the size is correct) ########
+################################################################################
+ floorplan
+ (
+  name "ROS Simulation World"
+  bitmap "s11.png"
+  size [ 58.844538 36.134454 3 ]
+  pose [ 0.000000 0.000000 0 0 ]
+ )
+
+################################################################################
+### Create the simulated Guiabot here (pose should be edited as required) ######
+################################################################################
+ guiabot
+ (
+  name "guiabot"
+  color "green"
+
+  pose [ 0.200000 -11.000000 0 90.000000 ]
+
+  guiabot_laser()
+ )
+
+################################################################################
+### All declared symbolic information sources go below this line ###############
+################################################################################
+apriltag
+(
+ name "tag_0"
+ pose [ -1.549656 -8.164238 1.100000 0.000000 ]
+)
+
+apriltag
+(
+ name "tag_1"
+ pose [ 1.680153 -4.151445 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_2"
+ pose [ -1.170357 -1.540968 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_3"
+ pose [ -0.923282 0.526661 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_4"
+ pose [ -5.201584 0.539665 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_5"
+ pose [ -8.439569 -1.814051 1.100000 0.000000 ]
+)
+
+apriltag
+(
+ name "tag_6"
+ pose [ -11.443485 0.539664 1.100000 -91.023057 ]
+)
+
+apriltag
+(
+ name "tag_7"
+ pose [ -14.421391 0.500653 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_8"
+ pose [ -14.772499 -1.658005 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_9"
+ pose [ -16.671078 -5.377133 1.100000 0.000000 ]
+)
+
+apriltag
+(
+ name "tag_10"
+ pose [ -16.671078 -8.120969 1.100000 0.000000 ]
+)
+
+apriltag
+(
+ name "tag_11"
+ pose [ -16.684082 -11.332947 1.100000 -0.895198 ]
+)
+
+apriltag
+(
+ name "tag_12"
+ pose [ -22.006145 3.485102 1.100000 44.309705 ]
+)
+
+apriltag
+(
+ name "tag_13"
+ pose [ -24.318348 6.493013 1.100000 -45.744061 ]
+)
+
+apriltag
+(
+ name "tag_14"
+ pose [ -22.517693 7.802580 1.100000 -90.868054 ]
+)
+
+apriltag
+(
+ name "tag_15"
+ pose [ -20.655655 9.828316 1.100000 -90.970935 ]
+)
+
+apriltag
+(
+ name "tag_16"
+ pose [ -22.967863 13.163622 1.100000 0.830318 ]
+)
+
+apriltag
+(
+ name "tag_17"
+ pose [ -21.699554 17.703001 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_18"
+ pose [ -17.402205 8.232285 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_19"
+ pose [ -13.985055 8.252748 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_20"
+ pose [ -11.120378 8.293672 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_21"
+ pose [ -8.480783 10.012477 1.100000 0.000000 ]
+)
+
+apriltag
+(
+ name "tag_22"
+ pose [ -7.253065 8.089051 1.100000 0.744026 ]
+)
+
+apriltag
+(
+ name "tag_23"
+ pose [ -7.192826 4.479651 1.100000 0.000000 ]
+)
+
+apriltag
+(
+ name "tag_24"
+ pose [ -0.070908 8.211819 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_25"
+ pose [ 7.111245 7.720732 1.100000 180.000000 ]
+)
+
+apriltag
+(
+ name "tag_26"
+ pose [ 13.904631 7.761653 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_27"
+ pose [ 22.519123 9.296301 1.100000 180.000000 ]
+)
+
+apriltag
+(
+ name "tag_28"
+ pose [ 7.090790 4.549119 1.100000 180.000000 ]
+)
+
+apriltag
+(
+ name "tag_29"
+ pose [ 4.921820 0.497647 1.100000 -90.000000 ]
+)
+
+apriltag
+(
+ name "tag_30"
+ pose [ 9.873619 0.293028 1.100000 180.000000 ]
+)
+
+apriltag
+(
+ name "tag_31"
+ pose [ 11.633353 -1.886243 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_32"
+ pose [ 14.422076 -1.921321 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_33"
+ pose [ 18.806860 -1.851165 1.100000 90.000000 ]
+)
+
+apriltag
+(
+ name "tag_34"
+ pose [ 22.577770 0.060602 1.100000 180.000000 ]
+)
+
+apriltag
+(
+ name "tag_35"
+ pose [ 8.756956 -5.920238 1.100000 90.954835 ]
+)
+
+apriltag
+(
+ name "tag_36"
+ pose [ 8.704339 -7.849542 1.100000 180.000000 ]
+)
+
+apriltag
+(
+ name "tag_37"
+ pose [ 10.984426 -9.691151 1.100000 -89.530401 ]
+)
+
+apriltag
+(
+ name "tag_38"
+ pose [ 17.631760 -9.638535 1.100000 -89.449129 ]
+)
+

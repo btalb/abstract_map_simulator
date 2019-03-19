@@ -1,0 +1,10 @@
+<launch>
+  <param name="use_sim_time" value="true" />
+
+  <!-- Launch the world simulator, guiabot simulator, and simulated tag finder -->
+  <include file="$(find human_cues_tag_simulator)/launch/world.launch" />
+  <node pkg="human_cues_tag_simulator" type="find_tags_simulated" name="tag_finder_simulated" >
+    <param name="sensor_range" value="5.0" />
+    <param name="sensor_fov_deg" value="360" />
+  </node>
+</launch>

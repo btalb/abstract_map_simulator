@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+
+import re
+import roslaunch
+import rospy
+import sys
+import tf2_ros
+
+import nav_msgs.msg as nav_msgs
+import geometry_msgs.msg as geometry_msgs
+import std_msgs.msg as std_msgs
+
+from human_cues_tag_simulator import simulator, tools
+
+ENV_DEFAULT = 's11'
+
+REGEX_TAG_ODOM = re.compile(r'^tag_\d*\/odom$')
+
+
+def publishTagTransforms(start_shift, frames):
+    # Get the shift between stage's origin and what will be the map origin
+    # (i.e. where the robot starts)
+    tf_msg = start_shift.pose.pose
+    tf_trans = (tf_msg.position.x, tf_msg.position.y, tf_msg.position.z)
+    tf_rot = (tf_msg.orientation.x, tf_msg.orientation.y, tf_msg.orientation.z,
+              tf_msg.orientation.w)
+
+    # Find each tag odom frame, and generate the associated transform msg
+    odom_frames = [
+        f for f in frames if re.search(REGEX_TAG_ODOM, f) is not None
+    ]
+    tf_msgs = [
+        geometry_msgs.TransformStamped(
+            header=std_msgs.Header(stamp=rospy.Time().now(), frame_id="map"),
+            child_frame_id=f,
+            transform=geometry_msgs.Transform(
+                translation=geometry_msgs.Vector3(*tf_trans),
+                rotation=geometry_msgs.Quaternion(*tf_rot)))
+        for f in odom_frames
+    ]
+
+    # Send the transforms through the static transform broadcaster
+    tb = tf2_ros.StaticTransformBroadcaster()
+    tb.sendTransform(tf_msgs)
+    rospy.logwarn(
+        "Published transforms to map frame for %d tags" % (len(odom_frames)))
+
+
+def main(env=ENV_DEFAULT):
+    """Main function for running the node"""
+    # Initialise a light node, and use it to get any parameter values passed in
+    # requesting remaps
+    rospy.init_node('simulator')
+    tfb = tf2_ros.Buffer()
+    tf2_ros.TransformListener(tfb)
+    cmd_vel_topic = rospy.get_param('~cmd_vel_topic', '/cmd_vel')
+    odom_topic = rospy.get_param('~odom_topic', '/odom')
+    scan_topic = rospy.get_param('~scan_topic', '/scan')
+
+    # Generate a world file, containing the map, tags, and robot
+    simulator.generateWorldFile(env)
+
+    # Launch stage with the generated world file
+    uuid = roslaunch.rlutil.get_or_generate_uuid(None, True)
+    roslaunch.configure_logging(uuid)
+    node = roslaunch.core.Node(
+        'stage_ros',
+        'stageros',
+        'stage',
+        args='-u -g ' + tools.worldPath(env),
+        remap_args=[('/guiabot/cmd_vel', cmd_vel_topic),
+                    ('/guiabot/odom', odom_topic), ('/guiabot/base_scan',
+                                                    scan_topic)])
+    launch = roslaunch.scriptapi.ROSLaunch()
+    launch.start()
+    process = launch.launch(node)
+
+    # Publish all of the tfs from the tags to the map frame
+    rospy.sleep(3)
+    publishTagTransforms(
+        rospy.wait_for_message("/guiabot/base_pose_ground_truth",
+                               nav_msgs.Odometry), tfb._getFrameStrings())
+
+    # Run until the process dies
+    while process.is_alive():
+        rospy.sleep(0.5)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main()

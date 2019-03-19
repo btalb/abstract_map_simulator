@@ -1,0 +1,6 @@
+image: s11.png
+resolution: 0.021008
+origin: [-29.432773, -18.067227, 0]
+negate: 0
+occupied_thresh: 0.600000
+free_thresh: 0.300000

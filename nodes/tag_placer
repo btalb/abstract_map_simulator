@@ -1,0 +1,218 @@
+#!/usr/bin/env python
+
+import csv
+import math
+import os
+import pdb
+import pyautogui as pag
+import rospy
+import sys
+import tf
+
+import geometry_msgs.msg as geometry_msgs
+import std_msgs.msg as std_msgs
+import visualization_msgs.msg as visualization_msgs
+
+try:
+    input = raw_input
+except NameError:
+    pass
+
+OUTPUT_FILENAME = "tags.txt"
+
+CLICK_TOPIC = "/move_base_simple/goal"
+MARKER_TOPIC = "/tag_markers"
+
+pub_markers = None
+tags = []
+
+
+def addTag(tag):
+    """Adds a tag to the global list of tags (also updating visuals)"""
+    global tags
+    tags = [t for t in tags if t[0] != tag[0]]  # Filter out duplicates
+    tags.append(tag)
+    tags = sorted(tags, key=lambda x: x[0])  # Resort them
+    updateTagMarkers()
+
+
+def callbackClick(msg):
+    """Callback for whenever a pose is published on the "click event" topic"""
+    global tags
+
+    # Process the event
+    rospy.loginfo("Creation event received. Handling:")
+    r, p, y = tf.transformations.euler_from_quaternion(
+        (msg.pose.orientation.x, msg.pose.orientation.y,
+         msg.pose.orientation.z, msg.pose.orientation.w))
+    y_deg = y * 180 / math.pi
+    print("\ttag creation requested @ (%f,%f), facing %f deg" %
+          (msg.pose.position.x, msg.pose.position.y, y_deg))
+    valid = False
+    while not valid:
+        next_id = nextTagID()
+        print(
+            "\tSpecify tag ID number (#%d if empty, 'x' to skip):" % (next_id))
+        windowSwap()
+        user_in = input().strip()
+        valid = True
+        if not user_in:
+            tag_id = next_id
+        elif user_in == 'x':
+            tag_id = None
+        else:
+            try:
+                tag_id = int(user_in)
+            except ValueError:
+                tag_id = None
+                valid = False
+
+    # Exit the event with the result
+    if tag_id is None:
+        print("\tNo tag was selected, event discarded")
+    else:
+        addTag((tag_id, msg.pose.position.x, msg.pose.position.y, y_deg))
+        print("\t%s" % (tag2String(tags[-1])))
+    print("Listening for next tag...")
+
+
+def loadTags(fn):
+    """Attempts to load existing tags from a provided tags file"""
+    global tags
+    with open(fn, 'r') as tags_file:
+        tags_reader = csv.reader(tags_file, delimiter=' ')
+        tags_new = [(int(row[0]), float(row[1]), float(row[2]), float(row[3]))
+                    for row in tags_reader]
+
+    tags_new = sorted(tags_new, key=lambda x: x[0])
+    for t in tags_new:
+        addTag(t)
+    rospy.loginfo("Loaded the following tags from: %s" % (fn))
+    for t in tags_new:
+        rospy.loginfo("\t%s" % (tag2String(t)))
+    rospy.sleep(0.5)
+    updateTagMarkers()
+
+
+def main(fn_in, fn_out):
+    global pub_markers
+    # Initialise all of the ROS side
+    rospy.init_node("tag_placement_node")
+    rospy.Subscriber(CLICK_TOPIC, geometry_msgs.PoseStamped, callbackClick)
+    pub_markers = rospy.Publisher(
+        MARKER_TOPIC, visualization_msgs.MarkerArray, queue_size=10)
+
+    # Attempt to load a tags file if supplied
+    if fn_in is not None:
+        loadTags(fn_in)
+
+    # Run through the tag creation process
+    rospy.loginfo("Listening for tag creation events:")
+    rospy.spin()
+
+    # We have exited, write the result
+    writeTags(fn_out)
+
+
+def nextTagID():
+    """Returns the next tag ID given the list of tags (also sorts)"""
+    global tags
+    tags = sorted(tags, key=lambda x: x[0])
+    return 0 if not tags else tags[-1][0] + 1
+
+
+def tag2String(tag):
+    """Takes a tag placement, and turns it into a verbose string"""
+    return ("Tag with ID #%d, was placed @ (%f,%f), facing %f deg" %
+            (tag[0], tag[1], tag[2], tag[3]))
+
+
+def updateTagMarkers():
+    """Republishes the tag_markers topic"""
+    SHIFT = 0.05
+    h = std_msgs.Header(stamp=rospy.Time.now(), frame_id='map')
+    ca = std_msgs.ColorRGBA(r=1, a=1)
+    cb = std_msgs.ColorRGBA(g=1, a=1)
+    ct = std_msgs.ColorRGBA(b=1, a=1)
+    sa = geometry_msgs.Vector3(x=0.1, y=0.5, z=0.5)
+    sb = geometry_msgs.Vector3(x=0.1, y=0.25, z=0.25)
+    st = geometry_msgs.Vector3(x=1, y=1, z=1)
+    ma = visualization_msgs.MarkerArray()
+    ma.markers.append(
+        visualization_msgs.Marker(
+            header=h, id=-1, action=visualization_msgs.Marker.DELETEALL))
+    for i, t in enumerate(tags):
+        th = t[3] * math.pi / 180.
+        q = tf.transformations.quaternion_from_euler(0, 0, th)
+        q = geometry_msgs.Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+        ma.markers.append(
+            visualization_msgs.Marker(
+                header=h,
+                id=i * 3,
+                type=visualization_msgs.Marker.CUBE,
+                action=visualization_msgs.Marker.ADD,
+                pose=geometry_msgs.Pose(
+                    position=geometry_msgs.Point(x=t[1], y=t[2]),
+                    orientation=q),
+                scale=sa,
+                color=ca))
+        ma.markers.append(
+            visualization_msgs.Marker(
+                header=h,
+                id=i * 3 + 1,
+                type=visualization_msgs.Marker.CUBE,
+                action=visualization_msgs.Marker.ADD,
+                pose=geometry_msgs.Pose(
+                    position=geometry_msgs.Point(
+                        x=t[1] + SHIFT * math.cos(th),
+                        y=t[2] + SHIFT * math.sin(th)),
+                    orientation=q),
+                scale=sb,
+                color=cb))
+        ma.markers.append(
+            visualization_msgs.Marker(
+                header=h,
+                id=i * 3 + 2,
+                type=visualization_msgs.Marker.TEXT_VIEW_FACING,
+                action=visualization_msgs.Marker.ADD,
+                pose=geometry_msgs.Pose(
+                    position=geometry_msgs.Point(x=t[1], y=t[2], z=0.5),
+                    orientation=q),
+                scale=st,
+                color=ct,
+                text=str(t[0])))
+    pub_markers.publish(ma)
+
+
+def windowSwap():
+    """Toggles the active window by sending ALT+TAB combo"""
+    pag.keyDown('alt')
+    pag.typewrite(['tab'])
+    pag.keyUp('alt')
+
+
+def writeTags(fn):
+    """Writes the current tags to the provided destination"""
+    print('\n')
+    with open(fn, 'wb') as tags_file:
+        tags_writer = csv.writer(tags_file, delimiter=' ')
+        for t in tags:
+            tags_writer.writerow(list(t))
+    rospy.loginfo("Wrote %d tags to: %s" % (len(tags), fn))
+
+
+if __name__ == '__main__':
+    rospy.loginfo("Starting Tag Placement Node with:")
+    if len(sys.argv) > 2:
+        err = "Too many arguments provided (%d)" % (len(sys.argv))
+        rospy.logerr(err)
+        raise ValueError(err)
+    if len(sys.argv) > 1:
+        fn_in = os.path.abspath(sys.argv[1])
+    else:
+        fn_in = None
+    fn_out = os.path.abspath(OUTPUT_FILENAME)
+    rospy.loginfo(
+        "\tInput Tags File:\t%s" % ("None" if fn_in is None else fn_in))
+    rospy.loginfo("\tOutput Tags File:\t%s" % (fn_out))
+    main(fn_in, fn_out)
