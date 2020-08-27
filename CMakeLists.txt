@@ -7,7 +7,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   roscpp
-  apriltags2_ros
+  apriltag_ros
   )
 
 # Uncomment this if the package has a setup.py. This macro ensures

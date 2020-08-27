@@ -14,7 +14,7 @@
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-#include <apriltags2_ros/AprilTagDetectionArray.h>
+#include <apriltag_ros/AprilTagDetectionArray.h>
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
@@ -42,7 +42,7 @@ void cbNewPose(const nav_msgs::Odometry& msg) {
   yaw_robot = tf2::quatRotate(pose_robot.getRotation(), zero_vector);
 
   // Look through all known tag_positions for a valid observation
-  apriltags2_ros::AprilTagDetectionArray atda;
+  apriltag_ros::AprilTagDetectionArray atda;
   atda.header.frame_id = "base_link";
   for (const std::pair<int, std::shared_ptr<tf2::Transform>>& tp :
        tag_positions_) {
@@ -65,7 +65,7 @@ void cbNewPose(const nav_msgs::Odometry& msg) {
     // TODO handle if behind an obstacle
 
     // We have a valid observation, append to the message
-    apriltags2_ros::AprilTagDetection atd;
+    apriltag_ros::AprilTagDetection atd;
     atd.id.push_back(tp.first);
     atd.size.push_back(0.163513);  // Copied from real node
     tf2::toMsg(
@@ -149,8 +149,8 @@ int main(int argc, char** argv) {
 
   // Configure all publishers and subscribers, letting callbacks control the
   // node from now on
-  pub_tag_detections_ = nh.advertise<apriltags2_ros::AprilTagDetectionArray>(
-      "/tag_detections", 10);
+  pub_tag_detections_ =
+      nh.advertise<apriltag_ros::AprilTagDetectionArray>("/tag_detections", 10);
   ros::Subscriber sub_robot_pose =
       nh.subscribe("/guiabot/base_pose_ground_truth", 100, cbNewPose);
   /* ros::Subscriber sub_laser = nh.subscribe("/scan_laser_fixed", 100,
