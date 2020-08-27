@@ -4,7 +4,7 @@ from PIL import Image
 import pdb
 import sys
 
-from human_cues_tag_simulator import simulator as sim
+from abstract_map_simulator import simulator as sim
 
 # THIS IS OLD DIRTY CODE (SHOULD STILL WORK, BUT NOT GUARANTEED TO BE
 # CONSISTENT WITH WHAT IS DONE IN THE LIBRARY FILES)
@@ -22,8 +22,8 @@ def main(map_filename):
     fn_map, fn_ext = os.path.splitext(os.path.basename(map_filename))
 
     # Get the pixels per meter value from file
-    ppm = sim.loadPixelsPerMeter(
-        os.path.join(fn_dir, fn_map + PPM_SUFFIX), True)
+    ppm = sim.loadPixelsPerMeter(os.path.join(fn_dir, fn_map + PPM_SUFFIX),
+                                 True)
     print("\tExtracted a Pixels Per Meter of: %f" % (ppm))
 
     # Get the dimensions of the image
