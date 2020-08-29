@@ -1,0 +1,26 @@
+<launch>
+  <arg name="allow_unknown" default="false" />
+
+  <node pkg="move_base" type="move_base" name="move_base" respawn="false" output="screen" >
+    <rosparam file="$(find abstract_map_simulator)/config/recovery_behaviours.yaml" command="load" />
+    <rosparam file="$(find abstract_map_simulator)/config/costmap_common.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find abstract_map_simulator)/config/costmap_common.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find abstract_map_simulator)/config/costmap_local.yaml" command="load" />
+    <rosparam file="$(find abstract_map_simulator)/config/costmap_global.yaml" command="load" />
+    <rosparam file="$(find abstract_map_simulator)/config/planner_local.yaml" command="load" />
+
+    <!-- <param name="global_costmap/obstacle_layer/track_unknown_space" value="true" /> -->
+    <!-- <param name="local_costmap/track_unknown_space" value="$(arg allow_unknown)" /> -->
+
+    <param name="base_global_planner" value="global_planner/GlobalPlanner" />
+    <param name="GlobalPlanner/allow_unknown" value="$(arg allow_unknown)" />
+
+    <param name="controller_frequency" value="5" />
+    <!-- <param name="planner_patience" value="3.0" /> -->
+
+    <!-- Tweaking to reduce stupidity in navigation... -->
+    <param name="GlobalPlanner/lethal_cost" value="253" />
+    <param name="GlobalPlanner/neutral_cost" value="66" />
+    <param name="GlobalPlanner/cost_factor" value="0.55" />
+  </node>
+</launch>

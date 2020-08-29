@@ -66,7 +66,7 @@ def main(env=ENV_DEFAULT):
     node = roslaunch.core.Node('stage_ros',
                                'stageros',
                                'stage',
-                               args='-u -g ' + tools.worldPath(env),
+                               args='-u ' + tools.worldPath(env),
                                remap_args=[('/guiabot/cmd_vel', cmd_vel_topic),
                                            ('/guiabot/odom', odom_topic),
                                            ('/guiabot/base_scan', scan_topic)])

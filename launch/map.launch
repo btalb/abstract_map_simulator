@@ -1,0 +1,22 @@
+<launch>
+  <!-- Param allows map to either be small & grow, or default oversized map -->
+  <arg name="small_map" default="true" />
+
+  <node pkg="gmapping" type="slam_gmapping" name="map_builder" output="screen">
+    <remap from="scan" to="/scan_laser_fixed" />
+    <param name="particles" value="100" />
+
+    <param name="occ_threshold" value="0.75" />
+
+    <!-- Allows obstacle free laser readings to be treated as free space -->
+    <!-- NOTE: this may have some danger, but it must be solved for other reasons regardless (i.e. if the laser misses glass but sees obstacles in the background, the same negative effect will occur as we enable here) -->
+    <param name="maxUrange" value="8.0" />
+    <param name="maxRange" value="9.0" />
+
+    <!-- Start the map small and let it grow -->
+    <param if="$(arg small_map)" name="xmin" value="-5" />
+    <param if="$(arg small_map)" name="xmax" value="5" />
+    <param if="$(arg small_map)" name="ymin" value="-5" />
+    <param if="$(arg small_map)" name="ymax" value="5" />
+  </node>
+</launch>
