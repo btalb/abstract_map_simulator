@@ -13,9 +13,10 @@ Package contains everything needed to simulate the zoo experiments performed in 
 
 *Note: this is just the simulator; to use the abstract map with the simulator please make sure you use the [abstract_map](https://github.com/btalb/abstract_map) package*
 
-Clone the repo:
+Clone the repo & install all Python dependencies:
 ```
 git clone https://github.com/btalb/abstract_map_simulator
+pip install -r abstract_map_simulator/requirements.txt
 ```
 
 Add the new package to your ROS workspace at `<ROS_WS>/` by linking in the cloned repository:
