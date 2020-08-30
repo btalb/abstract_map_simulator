@@ -5,9 +5,9 @@
 ![2D Stage simulation with with simulated tags](./docs/abstract_map_simulation.png)
 
 Package contains everything needed to simulate the zoo experiments performed in our [IEEE TCDS journal](https://doi.org/10.1109/TCDS.2020.2993855). The package includes: 
-- World & launch files for a stage simulation of the GP-S11 environment on QUT's Gardens Point campus
-- A tool for creating simulated tags in an environment & saving them to file,
-- Launch & config files for using the move_base navigation stack with gmapping to explore unseen simulated environments
+- world & launch files for a stage simulation of the GP-S11 environment on QUT's Gardens Point campus
+- a tool for creating simulated tags in an environment & saving them to file,
+- launch & config files for using the move_base navigation stack with gmapping to explore unseen simulated environments
 
 ## Installing the abstract map simulator
 
