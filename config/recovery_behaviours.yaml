@@ -1,0 +1,10 @@
+# TODO: these don't seem to be applied for whatever reason...
+conservative_reset:
+  reset_distance: 4.0
+  layer_names: 
+    - obstacle_layer
+
+aggressive_reset:
+  reset_distance: 7.0
+  layer_names:
+    - obstacle_layer

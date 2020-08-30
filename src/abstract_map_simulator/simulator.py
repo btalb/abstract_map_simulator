@@ -6,7 +6,7 @@ import re
 import rospkg
 import rospy
 
-from human_cues_tag_simulator import tags, tools
+from abstract_map_simulator import tags, tools
 
 WORLD_TAG_DEPTH = 0.25
 WORLD_TAG_HEIGHT = 0.5
@@ -52,23 +52,24 @@ def generateWorldFile(env_name):
     # Loop through the template file, writing the output file at the same time
     subs_dict = {
         '@TAG_DEPTH@':
-        str(WORLD_TAG_DEPTH),
+            str(WORLD_TAG_DEPTH),
         '@TAG_HEIGHT@':
-        str(WORLD_TAG_HEIGHT),
+            str(WORLD_TAG_HEIGHT),
         '@TAG_OFFSET@':
-        str(WORLD_TAG_OFFSET),
+            str(WORLD_TAG_OFFSET),
         '@TAG_WIDTH@':
-        str(WORLD_TAG_WIDTH),
+            str(WORLD_TAG_WIDTH),
         '@WORLD_HEIGHT@':
-        str(WORLD_WORLD_HEIGHT),
+            str(WORLD_WORLD_HEIGHT),
         '@FLOOR_PLAN_FILENAME@':
-        os.path.basename(fn_fp),
+            os.path.basename(fn_fp),
         '@FLOOR_PLAN_WH@':
-        "%f %f" % (im_w / ppm, im_h / ppm),
+            "%f %f" % (im_w / ppm, im_h / ppm),
         '@FLOOR_PLAN_XY@':
-        "%f %f" % (0, 0),
+            "%f %f" % (0, 0),
         '@ROBOT_POSE@':
-        "%f %f 0 %f" % (start_pose['x'], start_pose['y'], start_pose['th_deg'])
+            "%f %f 0 %f" %
+            (start_pose['x'], start_pose['y'], start_pose['th_deg'])
     }
     with open(fn_template, 'r') as template_file, open(fn_out,
                                                        'w') as world_file:
@@ -107,7 +108,11 @@ def loadStartPose(fn):
     with open(fn, 'r') as pose_file:
         pose_reader = csv.reader(pose_file, delimiter=' ')
         row = next(pose_reader)
-        pose = {'x': float(row[0]), 'y': float(row[1]), 'th_deg': float(row[2])}
+        pose = {
+            'x': float(row[0]),
+            'y': float(row[1]),
+            'th_deg': float(row[2])
+        }
 
     rospy.loginfo("Loaded the following starting pose from: %s" % (fn))
     rospy.loginfo("\t%s" % (startPose2String(pose)))
@@ -116,5 +121,5 @@ def loadStartPose(fn):
 
 def startPose2String(p):
     """Takes a pose, and turns it into a verbose string"""
-    return ("Starting pose @ (%f, %f), facing %f deg" % (p['x'], p['y'],
-                                                         p['th_deg']))
+    return ("Starting pose @ (%f, %f), facing %f deg" %
+            (p['x'], p['y'], p['th_deg']))

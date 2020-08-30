@@ -1,11 +1,11 @@
 <launch>
   <param name="use_sim_time" value="true" />
-  <node pkg="tf2_ros" type="static_transform_publisher" name="odom" ns="guiabot_transforms" args="0 0 0 0 0 0  /odom /guiabot/odom" />
-  <node pkg="tf2_ros" type="static_transform_publisher" name="base_footprint" ns="guiabot_transforms" args="0 0 0 0 0 0  /guiabot/base_footprint /base_footprint" />
-  <node pkg="tf2_ros" type="static_transform_publisher" name="base_link" ns="guiabot_transforms" args="0 0 0 0 0 0  /guiabot/base_link /base_link" />
-  <node pkg="tf2_ros" type="static_transform_publisher" name="base_laser_link" ns="guiabot_transforms" args="0 0 0 0 0 0  /guiabot/base_laser_link /laser" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="odom" ns="guiabot_transforms" args="0 0 0 0 0 0  odom guiabot/odom" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_footprint" ns="guiabot_transforms" args="0 0 0 0 0 0  guiabot/base_footprint base_footprint" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_link" ns="guiabot_transforms" args="0 0 0 0 0 0  guiabot/base_link base_link" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_laser_link" ns="guiabot_transforms" args="0 0 0 0 0 0  guiabot/base_laser_link laser" />
 
-  <node pkg="human_cues_tag_simulator" type="simulator" name="simulator" >
+  <node pkg="abstract_map_simulator" type="simulator" name="simulator">
     <param name="scan_topic" value="/scan_laser_fixed" />
   </node>
 </launch>

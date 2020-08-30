@@ -2,7 +2,7 @@ import os
 import rospkg
 import tf_conversions
 
-PACKAGE_NAME = 'human_cues_tag_simulator'
+PACKAGE_NAME = 'abstract_map_simulator'
 
 DIR_CONFIG = 'config'
 DIR_WORLDS = 'worlds'

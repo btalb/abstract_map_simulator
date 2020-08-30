@@ -10,7 +10,7 @@ import nav_msgs.msg as nav_msgs
 import geometry_msgs.msg as geometry_msgs
 import std_msgs.msg as std_msgs
 
-from human_cues_tag_simulator import simulator, tools
+from abstract_map_simulator import simulator, tools
 
 ENV_DEFAULT = 's11'
 
@@ -42,8 +42,8 @@ def publishTagTransforms(start_shift, frames):
     # Send the transforms through the static transform broadcaster
     tb = tf2_ros.StaticTransformBroadcaster()
     tb.sendTransform(tf_msgs)
-    rospy.logwarn(
-        "Published transforms to map frame for %d tags" % (len(odom_frames)))
+    rospy.logwarn("Published transforms to map frame for %d tags" %
+                  (len(odom_frames)))
 
 
 def main(env=ENV_DEFAULT):
@@ -63,14 +63,13 @@ def main(env=ENV_DEFAULT):
     # Launch stage with the generated world file
     uuid = roslaunch.rlutil.get_or_generate_uuid(None, True)
     roslaunch.configure_logging(uuid)
-    node = roslaunch.core.Node(
-        'stage_ros',
-        'stageros',
-        'stage',
-        args='-u -g ' + tools.worldPath(env),
-        remap_args=[('/guiabot/cmd_vel', cmd_vel_topic),
-                    ('/guiabot/odom', odom_topic), ('/guiabot/base_scan',
-                                                    scan_topic)])
+    node = roslaunch.core.Node('stage_ros',
+                               'stageros',
+                               'stage',
+                               args='-u ' + tools.worldPath(env),
+                               remap_args=[('/guiabot/cmd_vel', cmd_vel_topic),
+                                           ('/guiabot/odom', odom_topic),
+                                           ('/guiabot/base_scan', scan_topic)])
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
     process = launch.launch(node)

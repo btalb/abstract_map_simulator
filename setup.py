@@ -3,7 +3,7 @@
 from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
-d = generate_distutils_setup(
-    packages=['human_cues_tag_simulator'], package_dir={'': 'src'})
+d = generate_distutils_setup(packages=['abstract_map_simulator'],
+                             package_dir={'': 'src'})
 
 setup(**d)
